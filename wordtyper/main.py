@@ -1,4 +1,6 @@
+import itertools
 import math
+import pathlib
 import random
 
 import pygame
@@ -18,9 +20,22 @@ GAME_FONT = pygame.freetype.SysFont(pygame.font.get_default_font(), 42)
 tts_engine = pyttsx3.init()
 
 
+def load_words(level):
+    path = pathlib.Path(__file__).parent.joinpath('data', f'{level}.txt')
+    with open(path) as f:
+        return [w.strip() for w in f.readlines()]
+
+
+_LEVEL_WORDS = load_words('kindergarten')
+
+
 def random_word():
-    words = ['hi', 'top', 'bed', 'hair', 'boy', 'girl', 'eye']
-    return random.choice(words)
+    random.shuffle(_LEVEL_WORDS)
+    for w in itertools.cycle(_LEVEL_WORDS):
+        yield w
+
+
+WORDS = random_word()
 
 
 class Text(pygame.sprite.Sprite):
@@ -100,7 +115,7 @@ while running:
 
     # RENDER YOUR GAME HERE
     if word.need_word():
-        word.set_word(random_word())
+        word.set_word(next(WORDS))
     keys = pygame.key.get_pressed()
     word.draw(screen)
 
