@@ -1,3 +1,4 @@
+import math
 import random
 
 import pygame
@@ -35,9 +36,12 @@ class Text(pygame.sprite.Sprite):
 
 
 class Word:
-    def __init__(self, word=None):
+    def __init__(self, word=None, font_size=60, char_height=80, char_width=70):
         self.word = word
         self.word_pos = 0
+        self.font_size = font_size
+        self.char_height = char_height
+        self.char_width = char_width
 
     def need_word(self):
         return self.word is None or len(self.word) == self.word_pos
@@ -56,9 +60,12 @@ class Word:
 
     def draw(self, screen):
         all_sprites_list = pygame.sprite.Group() 
+        word_mid = int(len(self.word) / 2)
         for i, c in enumerate(self.word):
-            t = Text(c.upper(), 30, self.get_char_color(i), 50, 50)
-            t.rect.x = 50 * i
+            t = Text(c.upper(), self.font_size, self.get_char_color(i), self.char_width, self.char_height)
+            x_multiplier = i - word_mid
+            t.rect.x = (screen.get_width() / 2) + (self.char_width * x_multiplier + x_multiplier * 20)
+            t.rect.y = (screen.get_height() / 2) - (self.char_height / 2)
             all_sprites_list.add(t) 
         all_sprites_list.draw(screen)
 
@@ -81,7 +88,7 @@ while running:
             word.handle_keypress(event)
 
     # fill the screen with a color to wipe away anything from last frame
-    screen.fill("purple")
+    screen.fill("grey13")
 
     # RENDER YOUR GAME HERE
     if word.need_word():
