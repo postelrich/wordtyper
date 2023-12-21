@@ -3,6 +3,7 @@ import random
 
 import pygame
 import pygame.locals
+import pyttsx3
 
 # pygame setup
 pygame.init()
@@ -12,6 +13,9 @@ screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT))
 clock = pygame.time.Clock()
 running = True
 GAME_FONT = pygame.freetype.SysFont(pygame.font.get_default_font(), 42)
+
+# tts setup
+tts_engine = pyttsx3.init()
 
 
 def random_word():
@@ -72,6 +76,10 @@ class Word:
     def handle_keypress(self, e):
         if e.unicode == self.word[self.word_pos]:
             self.word_pos += 1
+
+        if self.word_pos == len(self.word):
+            tts_engine.say(self.word)
+            tts_engine.runAndWait()
 
 
 word = Word()
