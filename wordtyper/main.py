@@ -18,6 +18,7 @@ GAME_FONT = pygame.freetype.SysFont(pygame.font.get_default_font(), 42)
 
 # tts setup
 tts_engine = pyttsx3.init()
+tts_engine.setProperty('rate', 100)
 
 
 def load_words(level):
@@ -93,7 +94,7 @@ class Word:
             self.word_pos += 1
 
         if self.word_pos == len(self.word):
-            tts_engine.say(self.word)
+            tts_engine.say(f"{' '.join(self.word)} spells {self.word}")
             tts_engine.runAndWait()
 
 
