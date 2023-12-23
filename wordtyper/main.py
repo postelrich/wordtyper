@@ -70,19 +70,19 @@ class Word:
         self.word = w
         self.word_pos = 0
 
-    def get_char_color(self, char_pos):
-        if char_pos == self.word_pos:
-            return "blue"
-        elif char_pos < self.word_pos:
+    def get_char_color(self, char_pos, completed=False):
+        if char_pos < self.word_pos or completed:
             return "green"
+        elif char_pos == self.word_pos:
+            return "blue"
         else:
             return "gray"
 
-    def draw(self, screen):
+    def draw(self, screen, completed=False):
         all_sprites_list = pygame.sprite.Group() 
         word_mid = int(len(self.word) / 2)
         for i, c in enumerate(self.word):
-            t = Text(c.upper(), self.font_size, self.get_char_color(i), self.char_width, self.char_height)
+            t = Text(c.upper(), self.font_size, self.get_char_color(i, completed=completed), self.char_width, self.char_height)
             x_multiplier = i - word_mid
             t.rect.x = (screen.get_width() / 2) + (self.char_width * x_multiplier + x_multiplier * 20)
             t.rect.y = (screen.get_height() / 2) - (self.char_height / 2)
@@ -93,9 +93,9 @@ class Word:
         if e.unicode == self.word[self.word_pos]:
             self.word_pos += 1
 
-        if self.word_pos == len(self.word):
-            tts_engine.say(f"{' '.join(self.word)} spells {self.word}")
-            tts_engine.runAndWait()
+    def speak_word(self):
+        tts_engine.say(f"{' '.join(self.word)} spells {self.word}")
+        tts_engine.runAndWait()
 
 
 word = Word()
@@ -116,6 +116,10 @@ while running:
 
     # RENDER YOUR GAME HERE
     if word.need_word():
+        if word.word is not None:
+            word.draw(screen, completed=True)
+            pygame.display.flip()
+            word.speak_word()
         word.set_word(next(WORDS))
     keys = pygame.key.get_pressed()
     word.draw(screen)
