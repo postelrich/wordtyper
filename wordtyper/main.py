@@ -2,23 +2,24 @@ import itertools
 import math
 import pathlib
 import random
+import time
+from io import BytesIO
 
 import pygame
 import pygame.locals
-import pyttsx3
+from gtts import gTTS
+from mutagen.mp3 import MP3
+
 
 # pygame setup
 pygame.init()
+pygame.mixer.init()
 SCREEN_WIDTH = 1280
 SCREEN_HEIGHT = 720
 screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT))
 clock = pygame.time.Clock()
 running = True
 GAME_FONT = pygame.freetype.SysFont(pygame.font.get_default_font(), 42)
-
-# tts setup
-tts_engine = pyttsx3.init()
-tts_engine.setProperty('rate', 100)
 
 
 def load_words(level):
@@ -37,6 +38,19 @@ def random_word():
 
 
 WORDS = random_word()
+
+
+def speak(text, language='en'):
+    mp3_fo = BytesIO()
+    tts = gTTS(text, lang=language, tld='com.au', slow=True)
+    tts.write_to_fp(mp3_fo)
+    mp3_fo.seek(0)
+    audio = MP3(mp3_fo)
+    length = audio.info.length
+    mp3_fo.seek(0)
+    pygame.mixer.music.load(mp3_fo, 'mp3')
+    pygame.mixer.music.play()
+    time.sleep(length)
 
 
 class Text(pygame.sprite.Sprite):
@@ -94,8 +108,7 @@ class Word:
             self.word_pos += 1
 
     def speak_word(self):
-        tts_engine.say(f"{' '.join(self.word)} spells {self.word}")
-        tts_engine.runAndWait()
+        speak(f"{' '.join(self.word)} spells {self.word}")
 
 
 word = Word()
@@ -114,14 +127,15 @@ while running:
     # fill the screen with a color to wipe away anything from last frame
     screen.fill("grey13")
 
-    # RENDER YOUR GAME HERE
+    # speak word on completion and get next word
     if word.need_word():
         if word.word is not None:
             word.draw(screen, completed=True)
             pygame.display.flip()
             word.speak_word()
         word.set_word(next(WORDS))
-    keys = pygame.key.get_pressed()
+
+    # draw word
     word.draw(screen)
 
     # flip() the display to put your work on screen
